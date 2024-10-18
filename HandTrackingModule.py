@@ -1,32 +1,85 @@
 # """
 # Hand Tracking Module
 # By: Murtaza Hassan
-# Youtube: http://www.youtube.com/c/MurtazasWorkshopRoboticsandAI
-# Website: https://www.computervision.zone
+# Modify by Baptiste Bédouret
 # """
 
-
 import cv2
+import mediapipe as mp
+import time
 
-# Ouvrir la caméra (index 0 pour la caméra par défaut)
-cap = cv2.VideoCapture(0)
 
-while True:
-    # Lire une image de la caméra
-    success, image = cap.read()
+class HandDetector():
+    def __init__(self, static_image_mode = False, max_num_hands = 2, min_detection_confidence = 0.5, min_tracking_confidence = 0.5):
+        self.mode = static_image_mode
+        self.maxHands = max_num_hands
+        self.detectionCon = min_detection_confidence
+        self.trackCon = min_tracking_confidence
+
+        self.mpHands = mp.solutions.hands
+        self.hands = self.mpHands.Hands()
+        self.mpDraw = mp.solutions.drawing_utils
+
+    def findHands(self, image, draw=True):
+        imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        self.results = self.hands.process(imageRGB)
+
+        if self.results.multi_hand_landmarks:
+            for handLms in self.results.multi_hand_landmarks:
+                if draw:
+                    self.mpDraw.draw_landmarks(image, handLms, self.mpHands.HAND_CONNECTIONS)
+        return image
+
+    def findPosition(self, image, handNo=0, draw=True):
+        lmList = []
+        if self.results.multi_hand_landmarks:
+            myHand = self.results.multi_hand_landmarks[handNo]
+            for id, lm in enumerate(myHand.landmark):
+                h, w, c = image.shape
+                cx, cy = int(lm.x * w), int(lm.y * h)
+                lmList.append([id, cx, cy])
+                if draw:
+                    cv2.circle(image, (cx, cy), 10, (255, 0, 0), cv2.FILLED)
+        return lmList
+
+
+def main():
+
+    # Ouvrir la caméra 
+    cap = cv2.VideoCapture(0)
     
-    # Vérifier si la capture a réussi
-    if not success:
-        print("Erreur: Impossible de lire l'image de la caméra")
-        break
+    pTime = 0
+    cTime = 0
 
-    # Afficher l'image capturée
-    cv2.imshow("Flux caméra", image)
+    detector = HandDetector()
 
-    # Sortir de la boucle si la touche 'q' est pressée
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    while True:
+        # Lire une image de la caméra
+        success, image = cap.read()
+        image = detector.findHands(image)
+        lmList = detector.findPosition(image)
+        if len(lmList) != 0:
+            print(lmList[0]) # affiche les coordonnées du premier point de repère
 
-# Libérer les ressources et fermer les fenêtres
-cap.release()
-cv2.destroyAllWindows()
+
+        cTime = time.time()
+        fps = 1 / (cTime - pTime)
+        pTime = cTime
+
+        # Afficher du texte sur l'image
+        cv2.putText(image,  str(int(fps)), (10, 40), cv2.FONT_HERSHEY_SCRIPT_COMPLEX , 1, (255, 0, 0), 3)  
+
+        # Afficher l'image capturée
+        cv2.imshow("Flux caméra", image)
+
+        #Sortir de la boucle si la touche 'q' est pressée
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Libérer les ressources et fermer les fenêtres
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()
