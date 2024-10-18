@@ -14,9 +14,9 @@ while True:
     # Lire une image de la caméra
     success, image = cap.read()
     image = detector.findHands(image)
-    lmList = detector.findPosition(image)
-    if len(lmList) != 0:
-        print(lmList[0]) # affiche les coordonnées du premier point de repère
+    lmList = detector.findPosition(image, draw=False)
+    # if len(lmList) != 0:
+    #     print(lmList[0]) # affiche les coordonnées du premier point de repère
 
 
     cTime = time.time()

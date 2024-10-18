@@ -10,15 +10,20 @@ import time
 
 
 class HandDetector():
-    def __init__(self, static_image_mode = False, max_num_hands = 2, min_detection_confidence = 0.5, min_tracking_confidence = 0.5):
+    def __init__(self, static_image_mode = False, max_num_hands = 2, model_complexity = 1, min_detection_confidence = 0.5, min_tracking_confidence = 0.5):
         self.mode = static_image_mode
         self.maxHands = max_num_hands
+        self.modelComplexity = model_complexity
         self.detectionCon = min_detection_confidence
         self.trackCon = min_tracking_confidence
 
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands()
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.modelComplexity, self.detectionCon, self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
+
+        # Définir les spécifications de dessin
+        self.handLandmarkStyle = self.mpDraw.DrawingSpec(color=(255, 0, 0), thickness=5)  # Couleur et épaisseur des landmarks
+        self.handConnectionStyle = self.mpDraw.DrawingSpec(color=(0, 255, 0), thickness=2)  # Couleur et épaisseur des connecteurs
 
     def findHands(self, image, draw=True):
         imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -27,7 +32,13 @@ class HandDetector():
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
-                    self.mpDraw.draw_landmarks(image, handLms, self.mpHands.HAND_CONNECTIONS)
+                    self.mpDraw.draw_landmarks(
+                        image, 
+                        handLms, 
+                        self.mpHands.HAND_CONNECTIONS, 
+                        self.handLandmarkStyle,  
+                        self.handConnectionStyle 
+                    )
         return image
 
     def findPosition(self, image, handNo=0, draw=True):
@@ -57,9 +68,9 @@ def main():
         # Lire une image de la caméra
         success, image = cap.read()
         image = detector.findHands(image)
-        lmList = detector.findPosition(image)
-        if len(lmList) != 0:
-            print(lmList[0]) # affiche les coordonnées du premier point de repère
+        lmList = detector.findPosition(image, draw=False)
+        #if len(lmList) != 0:
+            #print(lmList[0]) # affiche les coordonnées du premier point de repère
 
 
         cTime = time.time()
