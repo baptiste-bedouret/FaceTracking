@@ -22,8 +22,8 @@ class HandDetector():
         self.mpDraw = mp.solutions.drawing_utils
 
         # Définir les spécifications de dessin
-        self.handLandmarkStyle = self.mpDraw.DrawingSpec(color=(255, 0, 0), thickness=5)  # Couleur et épaisseur des landmarks
-        self.handConnectionStyle = self.mpDraw.DrawingSpec(color=(0, 255, 0), thickness=2)  # Couleur et épaisseur des connecteurs
+        self.handLandmarkStyle = self.mpDraw.DrawingSpec(color=(0, 100, 0), thickness=8)  # Couleur et épaisseur des landmarks
+        self.handConnectionStyle = self.mpDraw.DrawingSpec(color=(50, 205, 50), thickness=4)  # Couleur et épaisseur des connecteurs
 
     def findHands(self, image, draw=True):
         imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

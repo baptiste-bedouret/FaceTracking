@@ -36,16 +36,16 @@ while True:
     success, image = cap.read()
     detector.findHands(image)
     lmList = detector.findPosition(image, draw=False)
-    
+
     if(len(lmList) != 0):
         x1, y1 =  lmList[4][1], lmList[4][2]
         x2, y2 =  lmList[8][1], lmList[8][2]
         cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
 
-        cv2.circle(image, (x1, y1), 13, (255, 0, 255), cv2.FILLED)
-        cv2.circle(image, (x2, y2), 13, (255, 0, 255), cv2.FILLED)
-        cv2.circle(image, (cx, cy), 13, (255, 0, 255), cv2.FILLED)
-        cv2.line(image, (x1, y1), (x2, y2), (255, 0, 255), 3)
+        cv2.circle(image, (x1, y1), 13, (0, 0, 255), cv2.FILLED)
+        cv2.circle(image, (x2, y2), 13, (0, 0, 255), cv2.FILLED)
+        cv2.circle(image, (cx, cy), 13, (0, 0, 255), cv2.FILLED)
+        cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 3)
 
         length = math.hypot(x2 - x1, y2 - y1)
 
@@ -58,17 +58,17 @@ while True:
         volume.SetMasterVolumeLevel(vol, None)
 
         if length < 50:
-            cv2.circle(image, (cx, cy), 13, (0, 255, 0), cv2.FILLED)
+            cv2.circle(image, (cx, cy), 13, (0, 100, 0), cv2.FILLED)
 
-        cv2.rectangle(image, (50, 150), (85, 400), (255, 0, 0), 3)
-        cv2.rectangle(image, (50, int(volBar)), (85, 400), (255, 0, 0), cv2.FILLED)
-        cv2.putText(image, f'{int(volPer)} %', (40, 450), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 0, 0), 3)
+        cv2.rectangle(image, (47, 147), (88, 400), (0, 0, 0), 3)
+        cv2.rectangle(image, (50, int(volBar) - 1), (85, 398), (0, 0, 255), cv2.FILLED)
+        cv2.putText(image, f'{int(volPer)} %', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 3)
 
     # FPS calculation
     cTime = time.time()
     fps = 1 / (cTime - pTime)
     pTime = cTime
-    cv2.putText(image, f'fps:{str(int(fps))}', (10, 40), cv2.FONT_HERSHEY_DUPLEX , 1, (255, 0, 0), 2) 
+    cv2.putText(image, f'fps:{str(int(fps))}', (10, 40), cv2.FONT_HERSHEY_DUPLEX , 1, (0, 0, 0), 2) 
 
     cv2.imshow("Flux caméra", image)
     if cv2.waitKey(1) & 0xFF == ord('q'):
