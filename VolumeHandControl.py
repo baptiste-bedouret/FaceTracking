@@ -10,15 +10,17 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 wCam, hCam = 1280, 720
 #####################
 
+# Open the camera
 cap = cv2.VideoCapture(0)
 cap.set(3, wCam)
 cap.set(4, hCam)
 pTime = 0
 cTime = 0
 
+# Hand detector instance
 detector = htm.HandDetector(min_detection_confidence = 0.7)
 
-# Volume control
+# Volume control setup
 devices = AudioUtilities.GetSpeakers()
 interface = devices.Activate(
     IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -34,8 +36,8 @@ while True:
     success, image = cap.read()
     detector.findHands(image)
     lmList = detector.findPosition(image, draw=False)
+    
     if(len(lmList) != 0):
-        # print(lmList[4], lmList[8])
         x1, y1 =  lmList[4][1], lmList[4][2]
         x2, y2 =  lmList[8][1], lmList[8][2]
         cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
@@ -48,7 +50,7 @@ while True:
         length = math.hypot(x2 - x1, y2 - y1)
 
         # Hand range is 50 - 300 and Volume Range is -65 - 0
-        # Converting length into volume
+        # Converting hand length into volume level
         vol = np.interp(length, [50, 370], [minVol, maxVol])
         volBar = np.interp(length, [50, 370], [400, 150])
         volPer = np.interp(length, [50, 370], [0, 100])
@@ -62,11 +64,10 @@ while True:
         cv2.rectangle(image, (50, int(volBar)), (85, 400), (255, 0, 0), cv2.FILLED)
         cv2.putText(image, f'{int(volPer)} %', (40, 450), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 0, 0), 3)
 
+    # FPS calculation
     cTime = time.time()
     fps = 1 / (cTime - pTime)
     pTime = cTime
-
-    # Afficher du texte sur l'image
     cv2.putText(image, f'fps:{str(int(fps))}', (10, 40), cv2.FONT_HERSHEY_DUPLEX , 1, (255, 0, 0), 2) 
 
     cv2.imshow("Flux caméra", image)
